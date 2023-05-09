@@ -98,7 +98,7 @@ import DynInputPasswordToggle from "./DynInputPasswordToggle.vue";
 import { reactive, ref } from "vue";
 import { useFirestore } from "vuefire";
 import { doc, getDoc, updateDoc } from "@firebase/firestore";
-import * as yup from "yup";
+import { object as yupObject, string as yupString } from "yup";
 
 const emits = defineEmits(["next", "abort"]);
 const db = useFirestore();
@@ -122,10 +122,9 @@ const errors = reactive({
   confirmPassword: "",
 });
 
-const validationSchema = yup.object().shape({
-  currentPassword: yup.string().required("Dieses field ist nötig"),
-  newPassword: yup
-    .string()
+const validationSchema = yupObject().shape({
+  currentPassword: yupString().required("Dieses field ist nötig"),
+  newPassword: yupString()
     .required("Dieses field ist nötig")
     .matches(/^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*\W).+$/, {
       message:
@@ -133,8 +132,7 @@ const validationSchema = yup.object().shape({
       excludeEmptyString: true,
     })
     .min(12, "Passwort muss mind. 12 Zeihen lange sein."),
-  confirmPassword: yup
-    .string()
+  confirmPassword: yupString()
     .required("Dieses field ist nötig")
     .test(
       "password-match",
