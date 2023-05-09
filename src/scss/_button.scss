@@ -17,7 +17,7 @@
 // <button class="bt bt-secondary bt-small" type="button">Label</button>
 //
 .bt {
-  @apply appearance-none outline-0 ring-0 focus-visible:outline-none enabled:cursor-pointer disabled:opacity-20;
+  @apply appearance-none outline-0 ring-0 focus-visible:outline-none enabled:cursor-pointer disabled:opacity-20 transition;
 }
 
 .bt-primary {

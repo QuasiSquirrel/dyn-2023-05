@@ -12,59 +12,59 @@
 </template>
 
 <script lang="ts">
-  import { computed, defineComponent, PropType } from 'vue'
-  import IconEyeClosed from '../svgs/IconEyeClosed.vue'
-  import IconEyeOpen from '../svgs/IconEyeOpen.vue'
-  import DynInput from './DynInput.vue'
+import { computed, defineComponent, PropType } from "vue";
+import IconEyeClosed from "../svgs/IconEyeClosed.vue";
+import IconEyeOpen from "../svgs/IconEyeOpen.vue";
+import DynInput from "./DynInput.vue";
 
-  /**
-   * Usage:
-   *
-   * <DynInput
-   *   …
-   *   ref="inputRef"
-   * >
-   *   <template #append>
-   *     <DynInputPasswordToggle :targetRef="inputRef" />
-   *   </template>
-   * </DynInput>
-   */
-  export default defineComponent({
-    name: 'DynInputPasswordToggle',
-    components: {
-      IconEyeOpen,
-      IconEyeClosed,
+/**
+ * Usage:
+ *
+ * <DynInput
+ *   …
+ *   ref="inputRef"
+ * >
+ *   <template #append>
+ *     <DynInputPasswordToggle :targetRef="inputRef" />
+ *   </template>
+ * </DynInput>
+ */
+export default defineComponent({
+  name: "DynInputPasswordToggle",
+  components: {
+    IconEyeOpen,
+    IconEyeClosed,
+  },
+  props: {
+    targetRef: {
+      type: Object as PropType<typeof DynInput>,
+      default: undefined,
     },
-    props: {
-      targetRef: {
-        type: Object as PropType<typeof DynInput>,
-        default: undefined,
-      },
-    },
-    setup(props) {
-      const isDisabled = computed(
-        () => props.targetRef && props.targetRef.disabled
-      )
+  },
+  setup(props) {
+    const isDisabled = computed(
+      () => props.targetRef && props.targetRef.disabled
+    );
 
-      const isPasswordShown = computed(
-        () => props.targetRef && props.targetRef.isPasswordShown
-      )
+    const isPasswordShown = computed(
+      () => props.targetRef && props.targetRef.isPasswordShown
+    );
 
-      const isVisible = computed(
-        () =>
-          props.targetRef &&
-          props.targetRef.type === 'password' &&
-          !props.targetRef.readonly
-      )
+    const isVisible = computed(
+      () =>
+        props.targetRef &&
+        props.targetRef.type === "password" &&
+        !props.targetRef.readonly
+    );
 
-      const toggle = () => {
-        if (props.targetRef) {
-          props.targetRef.onTogglePassword()
-          props.targetRef.focus()
-        }
+    const toggle = () => {
+      if (props.targetRef) {
+        props.targetRef.onTogglePassword();
+        props.targetRef.focus();
       }
+    };
 
-      return { isDisabled, isVisible, isPasswordShown, toggle }
-    },
-  })
+    return { isDisabled, isVisible, isPasswordShown, toggle };
+  },
+});
 </script>

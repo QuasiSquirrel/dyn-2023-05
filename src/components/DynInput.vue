@@ -49,180 +49,179 @@
 </template>
 
 <script lang="ts">
-  import { computed, defineComponent, PropType } from 'vue'
-  import { useFocus } from '../composables/useInputFocus'
-  import { useInputPasswordToggle } from '../composables/useInputPasswordToggle'
+import { computed, defineComponent, PropType } from "vue";
+import { useFocus } from "../composables/useInputFocus";
+import { useInputPasswordToggle } from "../composables/useInputPasswordToggle";
 
-  export default defineComponent({
-    name: 'DynInput',
-    props: {
-      autocomplete: {
-        type: String,
-        default: undefined,
-      },
-      disabled: {
-        type: Boolean,
-        default: false,
-      },
-      id: {
-        type: String,
-        default: undefined,
-      },
-      inputmode: {
-        type: String as PropType<'none' | 'text' | undefined>,
-        default: undefined,
-        validator: (value: string) =>
-          ['none', 'text', undefined].includes(value),
-      },
-      invalid: {
-        type: Boolean,
-        default: false,
-      },
-      label: {
-        type: String,
-        required: true,
-      },
-      maxlength: {
-        type: Number,
-        default: undefined,
-      },
-      minlength: {
-        type: Number,
-        default: undefined,
-      },
-      modelValue: {
-        type: [String, Number],
-        required: true,
-      },
-      name: {
-        type: String,
-        required: true,
-      },
-      placeholder: {
-        type: String,
-        default: undefined,
-      },
-      readonly: {
-        type: Boolean,
-        default: false,
-      },
-      required: {
-        type: Boolean,
-        default: false,
-      },
-      tabindex: {
-        type: Number,
-        default: undefined,
-      },
-      type: {
-        type: String,
-        default: 'text',
-        validator: (value: string) => ['password', 'text'].includes(value),
-      },
+export default defineComponent({
+  name: "DynInput",
+  props: {
+    autocomplete: {
+      type: String,
+      default: undefined,
     },
-    setup(props, { emit }) {
-      const { elementRef: inputRef, focus } = useFocus<HTMLInputElement>()
-      const { internalPasswordType, isPasswordShown, onTogglePassword } =
-        useInputPasswordToggle()
+    disabled: {
+      type: Boolean,
+      default: false,
+    },
+    id: {
+      type: String,
+      default: undefined,
+    },
+    inputmode: {
+      type: String as PropType<"none" | "text" | undefined>,
+      default: undefined,
+      validator: (value: string) => ["none", "text", undefined].includes(value),
+    },
+    invalid: {
+      type: Boolean,
+      default: false,
+    },
+    label: {
+      type: String,
+      required: true,
+    },
+    maxlength: {
+      type: Number,
+      default: undefined,
+    },
+    minlength: {
+      type: Number,
+      default: undefined,
+    },
+    modelValue: {
+      type: [String, Number],
+      required: true,
+    },
+    name: {
+      type: String,
+      required: true,
+    },
+    placeholder: {
+      type: String,
+      default: undefined,
+    },
+    readonly: {
+      type: Boolean,
+      default: false,
+    },
+    required: {
+      type: Boolean,
+      default: false,
+    },
+    tabindex: {
+      type: Number,
+      default: undefined,
+    },
+    type: {
+      type: String,
+      default: "text",
+      validator: (value: string) => ["password", "text"].includes(value),
+    },
+  },
+  setup(props, { emit }) {
+    const { elementRef: inputRef, focus } = useFocus<HTMLInputElement>();
+    const { internalPasswordType, isPasswordShown, onTogglePassword } =
+      useInputPasswordToggle();
 
-      const internalType = computed(() =>
-        typeof internalPasswordType.value === 'string'
-          ? internalPasswordType.value
-          : props.type
-      )
+    const internalType = computed(() =>
+      typeof internalPasswordType.value === "string"
+        ? internalPasswordType.value
+        : props.type
+    );
 
-      const computedId = computed(() => props.id || props.name)
+    const computedId = computed(() => props.id || props.name);
 
-      const computedModelValue = computed({
-        get() {
-          return props.modelValue
-        },
-        set(value: string | number) {
-          emit('update:modelValue', value)
-        },
-      })
+    const computedModelValue = computed({
+      get() {
+        return props.modelValue;
+      },
+      set(value: string | number) {
+        emit("update:modelValue", value);
+      },
+    });
 
-      // NOTE: computedProps returns dynamic attributes to attach
-      // to the HTMLInputElement.
-      // For example, input[type="number"] can have max and min attributes,
-      // but for input[type="text"] those are not valid.
-      // So we use the type prop to distinguish which props to bind.
-      const computedProps = computed(() => {
-        // defaults refers to a set of attributes which are valid
-        // _for all_ input types.
-        const defaults = {
-          autocomplete: props.autocomplete,
-          disabled: props.disabled,
-          id: computedId.value,
-          inputmode: props.inputmode,
-          maxlength: props.maxlength,
-          minlength: props.minlength,
-          name: props.name,
-          placeholder: props.placeholder,
-          readonly: props.readonly,
-          required: props.required,
-          tabindex: props.tabindex,
-          type: internalType.value,
-        }
+    // NOTE: computedProps returns dynamic attributes to attach
+    // to the HTMLInputElement.
+    // For example, input[type="number"] can have max and min attributes,
+    // but for input[type="text"] those are not valid.
+    // So we use the type prop to distinguish which props to bind.
+    const computedProps = computed(() => {
+      // defaults refers to a set of attributes which are valid
+      // _for all_ input types.
+      const defaults = {
+        autocomplete: props.autocomplete,
+        disabled: props.disabled,
+        id: computedId.value,
+        inputmode: props.inputmode,
+        maxlength: props.maxlength,
+        minlength: props.minlength,
+        name: props.name,
+        placeholder: props.placeholder,
+        readonly: props.readonly,
+        required: props.required,
+        tabindex: props.tabindex,
+        type: internalType.value,
+      };
 
-        switch (props.type) {
-          case 'password':
-          case 'text':
-          default:
-            return defaults
-        }
-      })
-
-      return {
-        computedId,
-        computedModelValue,
-        computedProps,
-        focus,
-        inputRef,
-        isPasswordShown,
-        onTogglePassword,
+      switch (props.type) {
+        case "password":
+        case "text":
+        default:
+          return defaults;
       }
-    },
-    emits: [
-      'blur',
-      'focus',
-      'input',
-      'keydown',
-      'keypress',
-      'keyup',
-      'change',
-      'update:modelValue',
-    ],
-  })
+    });
+
+    return {
+      computedId,
+      computedModelValue,
+      computedProps,
+      focus,
+      inputRef,
+      isPasswordShown,
+      onTogglePassword,
+    };
+  },
+  emits: [
+    "blur",
+    "focus",
+    "input",
+    "keydown",
+    "keypress",
+    "keyup",
+    "change",
+    "update:modelValue",
+  ],
+});
 </script>
 
 <style lang="scss" scoped>
-  label,
-  input {
-    @apply touch-manipulation;
-  }
+label,
+input {
+  @apply touch-manipulation;
+}
 
-  input:placeholder-shown ~ label {
-    @apply pointer-events-none cursor-text text-ellipsis whitespace-nowrap;
-    max-width: 66.66%;
-  }
+input:placeholder-shown ~ label {
+  @apply pointer-events-none cursor-text text-ellipsis whitespace-nowrap;
+  max-width: 66.66%;
+}
 
-  ::placeholder {
-    opacity: 0;
-    transition: inherit;
-  }
+::placeholder {
+  opacity: 0;
+  transition: inherit;
+}
 
-  input:focus::placeholder {
-    opacity: 1;
-  }
+input:focus::placeholder {
+  opacity: 1;
+}
 
-  input:not(:placeholder-shown) ~ label,
-  input:focus ~ label {
-    @apply pointer-events-none translate-x-3 -translate-y-9 scale-75 cursor-pointer rounded-t bg-blue-xxx-24 px-2 pt-0.5;
-  }
+input:not(:placeholder-shown) ~ label,
+input:focus ~ label {
+  @apply pointer-events-none translate-x-3 -translate-y-9 scale-75 cursor-pointer rounded-t bg-blue-xxx-24 px-2 pt-0.5;
+}
 
-  input:hover ~ label,
-  input:focus ~ label {
-    @apply rounded-t bg-blue-xxx-24 pt-0.5;
-  }
+input:hover ~ label,
+input:focus ~ label {
+  @apply rounded-t bg-blue-xxx-24 pt-0.5;
+}
 </style>

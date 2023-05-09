@@ -1,32 +1,36 @@
 <template>
-  <div>
+  <div class="container max-w-3xl">
     <StepVue>
-      <h2 class="uppercase text-bold">Passwort</h2>
-      <button class="bt bt-primary" @click="currentStep++">Ändern</button>
+      <h2 class="mb-5">Passwort</h2>
+      <button class="bt bt-primary rounded px-4" @click="currentStep++">
+        Ändern
+      </button>
     </StepVue>
     <StepVue>
-      <button @click="currentStep++">NextStep</button>
-      <SetPassword @next="currentStep++" @abort="currentStep = 0"/>
+      <SetPassword @next="currentStep++" @abort="currentStep = 0" />
     </StepVue>
     <StepVue>
-      FinalStep
+      <ToastVue
+        :title="'Passwort Ändern'"
+        :message="'Code versendet!'"
+        :icon="'mail'"
+      >
+        Wir haben dir eine E-Mail zum Zurűcksethen deines Passwortes an
+        <b class="text-white">Max.Mustermann@email.com</b> geschickt.
+      </ToastVue>
     </StepVue>
   </div>
 </template>
 
 <script setup>
-import SetPassword from './SetPassword.vue';
-import StepVue from './StepVue.vue';
-import { provide, ref } from 'vue';
+import SetPassword from "./SetPassword.vue";
+import ToastVue from "./ToastVue.vue";
+import StepVue from "./StepVue.vue";
+import { provide, ref } from "vue";
 
-const currentStep = ref(0)
-const stepCounter = ref(0)
+const currentStep = ref(0);
+const stepCounter = ref(0);
 
-
-provide('current_step', currentStep)
-provide('step_counter', stepCounter)
+provide("current_step", currentStep);
+provide("step_counter", stepCounter);
 </script>
-
-<style scoped>
-
-</style>

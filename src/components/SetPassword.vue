@@ -1,153 +1,180 @@
 <template>
   <form @submit.prevent="submit">
-    <h2 class="uppercase text-bold">Passwort Ändern</h2>
+    <h2>Passwort Ändern</h2>
+    <p class="text-sm text-gray mt-2 mb-4">
+      Vorgaben: mind. 12 Zeihen, 1 Zahl, 1 Sonderzeichen, 1 Großbuchstabe, 1
+      Kleinbuchstabe
+    </p>
     <fieldset>
-      <span>Vorgaben: mind. 12 Zeihen, 1 Zahl, 1 Sonderzeichen, 1 Großbuchstabe, 1 Kleinbuchstabe</span>
-      <div class="flex gap-2 items-center mb-5">
-        <div class="flex-1 relative">
+      <div class="flex flex-col md:flex-row gap-1 mb-6">
+        <div class="flex-1">
           <DynInput
-            name="current_password"
-            type="password"
             ref="current_password"
             v-model="inputs.currentPassword"
+            name="current_password"
+            type="password"
             label="Aktuelles Passwort"
             :invalid="errors.currentPassword ? true : false"
             @keyup="validate('currentPassword')"
           >
             <template #append>
-              <DynInputPasswordToggle :targetRef="current_password" />
+              <DynInputPasswordToggle :target-ref="current_password" />
             </template>
           </DynInput>
-          <p v-if="errors.currentPassword" class="absolute text-red-alert text-sm top-full left-2">{{ errors.currentPassword }}</p>
+          <p
+            v-if="errors.currentPassword"
+            class="text-red-alert text-sm top-full w-full px-2 flex-1"
+          >
+            {{ errors.currentPassword }}
+          </p>
         </div>
-        <a href="" class="flex-1 uppercase mt-2">Passwort Vergessen</a>
+        <a
+          href="#"
+          class="flex-1 font-bebas uppercase tracking-wider md:mt-5 md:pt-px pl-1 text-blue-active hover:text-blue-highlight transition"
+          >Passwort Vergessen
+        </a>
       </div>
     </fieldset>
-    <fieldset class="flex gap-2">
+    <fieldset class="flex flex-col md:flex-row gap-3 md:gap-2 mb-7">
       <div class="flex-1 relative">
         <DynInput
-          name="new_password"
-          type="password"
           ref="new_password"
           v-model="inputs.newPassword"
+          name="new_password"
+          type="password"
           label="NeuesPasswort"
           :invalid="errors.newPassword ? true : false"
           @keyup="validate('newPassword')"
         >
           <template #append>
-            <DynInputPasswordToggle :targetRef="new_password" />
+            <DynInputPasswordToggle :target-ref="new_password" />
           </template>
         </DynInput>
-        <p v-if="errors.newPassword" class="absolute text-red-alert text-sm top-full left-2">{{ errors.newPassword }}</p>
+        <p
+          v-if="errors.newPassword"
+          class="text-red-alert text-sm top-full w-full px-2"
+        >
+          {{ errors.newPassword }}
+        </p>
       </div>
       <div class="flex-1 relative">
         <DynInput
-          name="confirm_password"
-          type="password"
           ref="confirm_password"
           v-model="inputs.confirmPassword"
+          name="confirm_password"
+          type="password"
           label="Neues Passwort viederholen"
           :invalid="errors.confirmPassword ? true : false"
           @keyup="validate('confirmPassword')"
         >
           <template #append>
-            <DynInputPasswordToggle :targetRef="confirm_password" />
+            <DynInputPasswordToggle :target-ref="confirm_password" />
           </template>
         </DynInput>
-        <p v-if="errors.confirmPassword" class="absolute text-red-alert text-sm top-full left-2">{{ errors.confirmPassword }}</p>
+        <p
+          v-if="errors.confirmPassword"
+          class="text-red-alert text-sm top-full w-full px-2"
+        >
+          {{ errors.confirmPassword }}
+        </p>
       </div>
     </fieldset>
     <div class="flex gap-2">
-      <button type="button" class="bt bt-secondary">Abbrechen</button>
-      <button class="bt bt-primary">Änderungen Speichern</button>
+      <button
+        @click="$emit('abort')"
+        type="button"
+        class="bt bt-secondary rounded px-4"
+      >
+        Abbrechen
+      </button>
+      <button class="bt bt-primary rounded px-4">Änderungen Speichern</button>
     </div>
   </form>
 </template>
 
 <script setup>
-import DynInput from './DynInput.vue';
-import DynInputPasswordToggle from './DynInputPasswordToggle.vue';
-import { reactive, ref, unref } from 'vue';
-import * as yup from 'yup'
+import DynInput from "./DynInput.vue";
+import DynInputPasswordToggle from "./DynInputPasswordToggle.vue";
+import { reactive, ref } from "vue";
+import { useFirestore } from "vuefire";
+import { doc, getDoc, updateDoc } from "@firebase/firestore";
+import * as yup from "yup";
 
-const props = defineProps({
-  url: {
-    type: String,
-    required: true
-  }
-})
+const emits = defineEmits(["next", "abort"]);
+const db = useFirestore();
 
-const current_password = ref()
-const new_password = ref()
-const confirm_password = ref()
+/* id of 'user-one' would ideally be stored in a store management system like Pinia */
+const userRef = doc(db, "users", "user-one");
+
+const current_password = ref();
+const new_password = ref();
+const confirm_password = ref();
 
 const inputs = {
-  currentPassword: '',
-  newPassword: '',
-  confirmPassword: ''
-}
+  currentPassword: "",
+  newPassword: "",
+  confirmPassword: "",
+};
 
 const errors = reactive({
-  currentPassword: '',
-  newPassword: '',
-  confirmPassword: ''
-})
+  currentPassword: "",
+  newPassword: "",
+  confirmPassword: "",
+});
 
 const validationSchema = yup.object().shape({
-  currentPassword: yup.string().required('Dieses field is nötig'),
-  newPassword: yup.string().required('Dieses field is nötig').matches(/^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*\W).+$/, {
-    message: 'Passwort muss mind. 1 Zahl, 1 Sonderzeichen, 1 Großbuchstabe, 1 Kleinbuchstabe haben',
-    excludeEmptyString: true
-  }).min(12, 'Passwort muss mind. 12 Zeihen lange sein.'),
-  confirmPassword: yup.string().required('Dieses field is nötig').test(
-    'password-match', 
-    'Die Passwörter stimmen nicht',
-    (value, context) => value === inputs['newPassword']
-  ) 
-})
-
-const axiosHelper = async function (data, options = {}) {
-  
-  try {
-    const response = await axios (data, options)
-    resetForm()
-    return response
-  } catch (error) {
-    states.loading = false
-    console.log (error)
-  } finally {
-    states.loading = false
-  }
-}
+  currentPassword: yup.string().required("Dieses field ist nötig"),
+  newPassword: yup
+    .string()
+    .required("Dieses field ist nötig")
+    .matches(/^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*\W).+$/, {
+      message:
+        "Passwort muss mind. 1 Zahl, 1 Sonderzeichen, 1 Großbuchstabe, 1 Kleinbuchstabe haben",
+      excludeEmptyString: true,
+    })
+    .min(12, "Passwort muss mind. 12 Zeihen lange sein."),
+  confirmPassword: yup
+    .string()
+    .required("Dieses field ist nötig")
+    .test(
+      "password-match",
+      "Die Passwörter stimmen nicht",
+      (value) => value === inputs["newPassword"]
+    ),
+});
 
 const validate = async function (field) {
-  console.log(inputs['newPassword'])
   const value = await validationSchema.fields[field]
     .validate(inputs[field], { abortEarly: false })
-    .catch(err => {
-      errors[field] = err.errors[0]
-    })
-  if(value) {
-    errors[field] = ''
+    .catch((err) => {
+      errors[field] = err.errors[0];
+    });
+  if (value) {
+    errors[field] = "";
   }
-}
+};
 
 const submit = async function () {
-  const value = await validationSchema.isValid(inputs)
-  if(!value) {
-    return
+  for (let input in inputs) {
+    await validate(input);
+  }
+  const value = await validationSchema.isValid(inputs);
+  if (!value) {
+    return;
   }
 
-  const formData = new FormData()
-  for(const key in inputs) {
-    formData.set(key, inputs[key])
+  const docSnap = await getDoc(userRef);
+  if (docSnap.data().password !== inputs.currentPassword) {
+    errors.currentPassword = "Das Passwort ist nicht genau";
+    return;
   }
 
-  const axios = await axiosHelper ()
-}
+  const updatedPassword = await updateDoc(userRef, {
+    password: inputs.newPassword,
+  });
 
+  emits("next");
+};
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>
