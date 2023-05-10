@@ -2,12 +2,12 @@
   <div class="container max-w-3xl">
     <StepVue>
       <h2 class="mb-5">Passwort</h2>
-      <button class="bt bt-primary rounded px-4" @click="currentStep++">
+      <button class="bt bt-primary rounded px-4" @click="nextStep">
         Ändern
       </button>
     </StepVue>
     <StepVue>
-      <SetPassword @next="currentStep++" @abort="currentStep = 0" />
+      <SetPassword @next="nextStep" @abort="currentStep = 0" />
     </StepVue>
     <StepVue>
       <ToastVue
@@ -33,4 +33,8 @@ const stepCounter = ref(0);
 
 provide("current_step", currentStep);
 provide("step_counter", stepCounter);
+
+const nextStep = function () {
+  if (stepCounter.value > currentStep.value) currentStep.value++;
+};
 </script>
